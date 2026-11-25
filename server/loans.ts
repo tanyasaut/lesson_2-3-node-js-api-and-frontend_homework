@@ -5,7 +5,26 @@ import { HttpError } from './http.ts'
 
 // Чтение уже работает. Параметры URL понадобятся только для бонуса Д1.
 export async function listLoans(_url: URL): Promise<Snapshot> {
-  return { stock: STOCK, loans: await store.list() }
+  const loans = await store.list()
+
+  if (!_url.searchParams.has('status')) {
+    return { stock: STOCK, loans }
+  }
+
+  const all = _url.searchParams.getAll('status')
+  if (all.length !== 1) {
+    throw new HttpError(400, 'INVALID_FILTER', 'Параметр status должен быть указан ровно один раз.')
+  }
+
+  const value = all[0]
+  if (value === 'all') {
+    return { stock: STOCK, loans }
+  }
+  if (value !== 'active' && value !== 'returned') {
+    throw new HttpError(400, 'INVALID_FILTER', 'Допустимые значения status: active, returned, all.')
+  }
+
+  return { stock: STOCK, loans: loans.filter(loan => loan.status === value) }
 }
 
 // А1: проверка выдачи и доступного остатка.
