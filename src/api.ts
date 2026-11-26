@@ -16,9 +16,17 @@ export const getSnapshot = (): Promise<Snapshot> => request('/api/loans')
 
 // А3: реализуйте операции клиента по опубликованному контракту API.
 export async function issue(_input: LoanInput): Promise<Loan> {
-  throw new Error('Отправка выдачи пока не подключена.')
+  return request<Loan>('/api/loans', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(_input),
+  })
 }
 export async function takeBack(_id: string): Promise<Loan> {
-  throw new Error('Запрос возврата пока не подключён.')
+  return request<Loan>(`/api/loans/${encodeURIComponent(_id)}`, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ status: 'returned' }),
+  })
 }
 
